@@ -1,0 +1,402 @@
+            Form1.cs
+
+using System;
+using System.Collections.Generic;
+using System.Xml;
+using SAPbouiCOM.Framework;
+
+namespace Exam
+{
+    [FormAttribute("Exam.Form1", "Form1.b1f")]
+    class Form1 : UserFormBase
+    {
+        public Form1()
+        {
+            AddGridRow(true);
+        }
+        public void AddGridRow(bool AddFirstRow)
+        {
+            bool Error = true;
+            try
+            {
+                if (AddFirstRow)
+                {
+                    if (Matrix0.VisualRowCount == 0)
+                        Matrix0.AddRow();
+                }
+                else
+                {
+                    Matrix0.AddRow();
+                }
+                ((SAPbouiCOM.EditText)Matrix0.Columns.Item("#").Cells.Item(Matrix0.VisualRowCount).Specific).Value = Convert.ToString(Matrix0.RowCount);
+
+                // Application.SBO_Application.MessageBox("ohk", 1);
+
+
+            }
+            catch (Exception ex)
+            {
+                // Log.Logger(Log.Type.Error, ex);
+                //    Log.Logger(Log.Type.Error, System.Reflection.MethodBase.GetCurrentMethod().Name + ", Error:" + ex.StackTrace);
+                Error = false;
+            }
+        }
+        /// <summary>
+        /// Initialize components. Called by framework after form created.
+        /// </summary>
+        public override void OnInitializeComponent()
+        {
+            this.StaticText0 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_0").Specific));
+            this.EditText0 = ((SAPbouiCOM.EditText)(this.GetItem("Item_1").Specific));
+            this.EditText0.ChooseFromListAfter += new SAPbouiCOM._IEditTextEvents_ChooseFromListAfterEventHandler(this.EditText0_ChooseFromListAfter);
+            this.StaticText1 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_2").Specific));
+            this.EditText1 = ((SAPbouiCOM.EditText)(this.GetItem("Item_3").Specific));
+            this.Matrix0 = ((SAPbouiCOM.Matrix)(this.GetItem("Item_4").Specific));
+            this.Matrix0.DoubleClickAfter += new SAPbouiCOM._IMatrixEvents_DoubleClickAfterEventHandler(this.Matrix0_DoubleClickAfter);
+            this.Matrix0.KeyDownBefore += new SAPbouiCOM._IMatrixEvents_KeyDownBeforeEventHandler(this.Matrix0_KeyDownBefore);
+            this.Button0 = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
+            this.Button0.ClickBefore += new SAPbouiCOM._IButtonEvents_ClickBeforeEventHandler(this.Button0_ClickBefore);
+            this.OnCustomInitialize();
+
+        }
+
+        /// <summary>
+        /// Initialize form event. Called by framework before form creation.
+        /// </summary>
+        public override void OnInitializeFormEvents()
+        {
+        }
+
+        private SAPbouiCOM.StaticText StaticText0;
+
+        private void OnCustomInitialize()
+        {
+
+        }
+
+        private SAPbouiCOM.EditText EditText0;
+        private SAPbouiCOM.StaticText StaticText1;
+        private SAPbouiCOM.EditText EditText1;
+        private SAPbouiCOM.Matrix Matrix0;
+        private SAPbouiCOM.Button Button0;
+
+        private void EditText0_ChooseFromListAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
+        {
+            //throw new System.NotImplementedException();
+            SAPbouiCOM.ISBOChooseFromListEventArg chList = (SAPbouiCOM.ISBOChooseFromListEventArg)pVal;
+            SAPbouiCOM.DataTable oTable = chList.SelectedObjects;
+            try
+            {
+                EditText0.Value = oTable.GetValue("CardCode", 0).ToString();
+            }
+            catch { }
+            try
+            {
+                EditText1.Value = oTable.GetValue("CardName", 0).ToString();
+            }
+            catch { }
+        }
+
+        public static bool FormExists(string formuid)
+        {
+            bool result = false;
+            try
+            {
+                Program.SBO_Application.Forms.Item(formuid);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                //ExceptionLog.SendErrorToText(ex);
+            }
+            return result;
+        }
+
+        private void Matrix0_KeyDownBefore(object sboObject, SAPbouiCOM.SBOItemEventArg pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            //throw new System.NotImplementedException();
+            try
+            {
+                if ((pVal.CharPressed == 13 | pVal.CharPressed == 9 | pVal.CharPressed == 40))
+                {
+                    if (Matrix0.VisualRowCount == pVal.Row)
+                    {
+                        if (!string.IsNullOrEmpty(((SAPbouiCOM.EditText)Matrix0.Columns.Item(3).Cells.Item(Matrix0.VisualRowCount).Specific).Value.ToString().Trim()))
+                        {
+                            AddGridRow(false);
+                            Matrix0.ClearRowData(Matrix0.RowCount);
+                            Matrix0.SetCellFocus(Matrix0.RowCount, 0);
+                        }
+                    }
+
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                // throw new System.NotImplementedException();
+            }
+        }
+
+        private void Matrix0_DoubleClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
+        {
+            //throw new System.NotImplementedException();
+            try
+            {
+                if (!FormExists("DtlForm"))
+                {
+
+                    if (pVal.ColUID == "Click")
+                    {
+                        Form2 form = new Form2(((SAPbouiCOM.EditText)Matrix0.Columns.Item("#").Cells.Item(pVal.Row).Specific).Value);
+                        form.onAddData += form_onAddData; //SalesQuotation_Para;
+                        form.Show();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        void form_onAddData(int LineId, string item, string Quantity, string Discount)
+        {
+            try
+            {
+
+                ((SAPbouiCOM.EditText)Matrix0.Columns.Item("ItemCode").Cells.Item(LineId).Specific).Value = item;
+                ((SAPbouiCOM.EditText)Matrix0.Columns.Item("Quantity").Cells.Item(LineId).Specific).Value = Quantity;
+                ((SAPbouiCOM.EditText)Matrix0.Columns.Item("Discount").Cells.Item(LineId).Specific).Value = Discount;
+
+            }
+            catch (Exception ex) { }
+        }
+
+        private void Button0_ClickBefore(object sboObject, SAPbouiCOM.SBOItemEventArg pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            //throw new System.NotImplementedException();
+            try
+            {
+
+                SAPbobsCOM.Documents oPO = (SAPbobsCOM.Documents)Program.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+
+
+                oPO.CardCode = EditText0.Value;
+                oPO.CardName = EditText1.Value;
+
+                oPO.DocDueDate = DateTime.Now.Date;
+
+                int lineNum = 0;
+
+                //foreach (var item in objCalc.lstCalculation)
+                for (int i = 1; i <= Matrix0.RowCount; i++)
+                {
+                    if (((SAPbouiCOM.EditText)Matrix0.Columns.Item("ItemCode").Cells.Item(i).Specific).Value != "")
+                    {
+                        oPO.Lines.SetCurrentLine(lineNum);
+                        oPO.Lines.ItemCode = ((SAPbouiCOM.EditText)Matrix0.Columns.Item("ItemCode").Cells.Item(i).Specific).Value;
+                        oPO.Lines.Quantity = Convert.ToDouble(((SAPbouiCOM.EditText)Matrix0.Columns.Item("Quantity").Cells.Item(i).Specific).Value);
+                        oPO.Lines.DiscountPercent = Convert.ToDouble(((SAPbouiCOM.EditText)Matrix0.Columns.Item("Discount").Cells.Item(i).Specific).Value);
+                        oPO.Lines.Add();
+                        lineNum++;
+                    }
+                }
+
+                int result = oPO.Add();
+
+                string error = string.Empty;
+                int iErr;
+
+                Program.oCompany.GetLastError(out iErr, out error);
+                if (result == 0)
+                {
+
+                    Program.SBO_Application.StatusBar.SetText("Add Successfully", SAPbouiCOM.BoMessageTime.bmt_Medium, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
+
+                }
+                else
+                {
+                    Program.SBO_Application.StatusBar.SetText("Not Add", SAPbouiCOM.BoMessageTime.bmt_Medium, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                }
+
+
+                // Validations
+                if (EditText0.Value == String.Empty)
+                {
+                    Program.SBO_Application.StatusBar.SetText("Enter the CardCode", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                    BubbleEvent = false;
+                    return;
+                }
+                if (EditText1.Value == String.Empty)
+                {
+                    Program.SBO_Application.StatusBar.SetText("Enter the CardName", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                    BubbleEvent = false;
+                    return;
+                }
+                if (((SAPbouiCOM.EditText)Matrix0.Columns.Item("ItemCode").Cells.Item(Matrix0.VisualRowCount).Specific).Value == String.Empty)
+                {
+
+                    Program.SBO_Application.StatusBar.SetText("Enter ItemCode", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                    BubbleEvent = false;
+                    return;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
+}
+
+                Form2.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using SAPbouiCOM.Framework;
+
+namespace Exam
+{
+    [FormAttribute("Exam.Form2", "Form2.b1f")]
+    class Form2 : UserFormBase
+    {
+        bool getResult = false;
+        public Form2(string LineID = null)
+        {
+            txtLine.Value = LineID;
+        }
+
+
+        /// <summary>
+        /// Initialize components. Called by framework after form created.
+        /// </summary>
+        public override void OnInitializeComponent()
+        {
+            this.StaticText0 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_0").Specific));
+            this.StaticText1 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_1").Specific));
+            this.StaticText2 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_2").Specific));
+            this.StaticText3 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_3").Specific));
+            this.txtLine = ((SAPbouiCOM.EditText)(this.GetItem("txtLine").Specific));
+            this.txtItem = ((SAPbouiCOM.EditText)(this.GetItem("txtItem").Specific));
+            this.txtItem.ChooseFromListAfter += new SAPbouiCOM._IEditTextEvents_ChooseFromListAfterEventHandler(this.txtItem_ChooseFromListAfter);
+            this.txtQty = ((SAPbouiCOM.EditText)(this.GetItem("txtQty").Specific));
+            this.txtDisc = ((SAPbouiCOM.EditText)(this.GetItem("txtDisc").Specific));
+            this.Button0 = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
+            this.Button0.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this.Button0_ClickAfter);
+            //   ofom error
+            this.oForm = ((SAPbouiCOM.Form)(this.UIAPIRawForm));
+            this.Button0.ClickBefore += new SAPbouiCOM._IButtonEvents_ClickBeforeEventHandler(this.Button0_ClickBefore);
+            this.OnCustomInitialize();
+
+        }
+
+        /// <summary>
+        /// Initialize form event. Called by framework before form creation.
+        /// </summary>
+        public override void OnInitializeFormEvents()
+        {
+        }
+
+        private SAPbouiCOM.Form oForm;
+        //**** Delegate to send data to another form
+        public delegate void LoadSelection(int LineId, string item, string Quantity, string Discount);
+        public event LoadSelection onAddData;
+
+        private SAPbouiCOM.StaticText StaticText0;
+
+        private void OnCustomInitialize()
+        {
+
+        }
+
+        private SAPbouiCOM.StaticText StaticText1;
+        private SAPbouiCOM.StaticText StaticText2;
+        private SAPbouiCOM.StaticText StaticText3;
+        private SAPbouiCOM.EditText txtLine;
+        private SAPbouiCOM.EditText txtItem;
+        private SAPbouiCOM.EditText txtQty;
+        private SAPbouiCOM.EditText txtDisc;
+        private SAPbouiCOM.Button Button0;
+        bool IsdataAdd = false;
+
+        private void Button0_ClickBefore(object sboObject, SAPbouiCOM.SBOItemEventArg pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+           // throw new System.NotImplementedException();
+           // BubbleEvent = true;
+            try
+            {
+                if (Button0.Caption == "Add" || Button0.Caption == "Update")
+                {
+                    // delegate event............. match with delegate signature
+                    onAddData(Convert.ToInt32(txtLine.Value), txtItem.Value, txtQty.Value, txtDisc.Value);
+                    oForm.Mode = SAPbouiCOM.BoFormMode.fm_OK_MODE;
+                    IsdataAdd = true;
+                }
+            }
+            catch (Exception ex) { }//ExceptionLog.SendErrorToText(ex); }
+        }
+
+        private void Button0_ClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
+        {
+            //throw new System.NotImplementedException();
+            if (Button0.Caption == "Add")
+            {
+                if (IsdataAdd == true)
+                {
+                    getResult = true;
+                    Program.SBO_Application.StatusBar.SetText("Operation Completed Successfully!!!", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
+
+                }
+                else
+                {
+                    Program.SBO_Application.StatusBar.SetText("Not Added Successfully!!!", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                }
+            }
+        }
+
+        private void Form_CloseBefore(SAPbouiCOM.SBOItemEventArg pVal, out bool BubbleEvent)
+        {
+            if (getResult == true)
+            {
+                BubbleEvent = true;
+            }
+            else
+            {
+                BubbleEvent = false;
+            }
+
+        }
+
+        private void txtItem_ChooseFromListAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
+        {
+            //throw new System.NotImplementedException();
+            SAPbouiCOM.ISBOChooseFromListEventArg chList = (SAPbouiCOM.ISBOChooseFromListEventArg)pVal;
+            SAPbouiCOM.DataTable oTable = chList.SelectedObjects;
+            try
+            {
+                txtItem.Value = oTable.GetValue("ItemCode", 0).ToString();
+            }
+            catch { }
+           
+        }
+    }
+}
+
+
+
+            program.cs
+public static SAPbouiCOM.Application SBO_Application;
+        public static SAPbobsCOM.Company oCompany;
+        
+        
+        
+         SBO_Application = SAPbouiCOM.Framework.Application.SBO_Application;
+                oCompany = ((SAPbobsCOM.Company)SBO_Application.Company.GetDICompany());
